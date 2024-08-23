@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SIGN;
 
 const fetchuser = (req, res, next) => {
-  // Get the token from the JWT Token and Add ID to the request object.
+  // Task: Get the token from the JWT Token and Add ID to the request object.
 
   // Get the token
   const token = req.header('auth-token');
@@ -18,7 +18,9 @@ const fetchuser = (req, res, next) => {
     req.user = data.userID;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Unauthorized User' });
+    return res
+      .status(401)
+      .json({ message: 'Unauthorized User', error: error.message });
   }
 };
 
