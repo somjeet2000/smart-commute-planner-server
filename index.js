@@ -1,19 +1,11 @@
 const connectToMongo = require('./config/database');
 const express = require('express');
-const cors = require('cors');
 const dotenv = require('dotenv');
+const app = require('./app');
 
 dotenv.config();
 connectToMongo();
-
-const app = express();
-const port = process.env.PORT;
-
-app.use(cors());
-app.use(express.json());
-
-// Available routes
-app.use('/api/v1/auth', require('./routes/authentication'));
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
   console.log(`Smart Commute Planner server listening on port ${port}`);
