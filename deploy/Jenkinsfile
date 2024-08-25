@@ -1,0 +1,87 @@
+pipeline {
+    agent any
+
+    environment {
+        NODE_ENV = "development"
+        // Docker Hub Credentials
+        DOCKERHUB_CRED = 'dockerhub-cred'
+        DOCKERHUB_REPO = 'somjeetsrimani/smart-commute-planner'
+        IMAGE_TAG = 'v1'
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/development']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/somjeet2000/smart-commute-planner-server.git']])
+            }
+        }
+
+        stage('Clean Node Modules & Npm Cache') {
+            steps {
+                sh 'rm -rf node_modules'
+                sh 'npm cache clean --force'
+            }
+        }
+
+        stage('Install Dependencies') {
+            agent {
+                docker {
+                    image 'node:20-alpine' // Use an appropriate Node.js image
+                    args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // Mount Docker socket
+                }
+            }
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        // This step will run for unit test cases available
+        stage('Run Tests') {
+            agent {
+                docker {
+                    image 'node:20'
+                    args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                sh 'npm test'
+            }
+        }
+
+        // Stage - Build docker image works
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t $DOCKERHUB_REPO:$IMAGE_TAG .'
+                }
+            }
+        }
+
+        // Stage - Push to Docker Hub works
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: env.DOCKERHUB_CRED, passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
+                        sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                        sh 'docker push $DOCKERHUB_REPO:$IMAGE_TAG'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment completed successfully!'
+        }
+        failure {
+            echo 'Deployment failed!'
+        }
+    }
+}
