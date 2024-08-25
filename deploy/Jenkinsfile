@@ -40,25 +40,6 @@ pipeline {
             }
         }
 
-        // stage('Checkout') {
-        //     steps {
-        //         checkout scmGit(branches: [[name: '*/development']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/somjeet2000/smart-commute-planner-server.git']])
-        //     }
-        // }
-
-        // stage('Clean Node Modules & Npm Cache') {
-        //     agent {
-        //         docker {
-        //             image 'node:20-alpine' // Use an appropriate Node.js image
-        //             args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // Mount Docker socket
-        //         }
-        //     }
-        //     steps {
-        //         sh 'rm -rf node_modules'
-        //         sh 'npm cache clean --force'
-        //     }
-        // }
-
         stage('Install Dependencies') {
             agent {
                 docker {
@@ -92,7 +73,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t $DOCKERHUB_REPO:$IMAGE_TAG .'
+                    sh 'docker build -t $DOCKERHUB_REPO:$IMAGE_TAG -f deploy/Dockerfile .'
                 }
             }
         }
