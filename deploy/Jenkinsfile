@@ -83,8 +83,8 @@ pipeline {
                 }
             }
             steps {
-                sh 'export \$(echo "$ENV_FILE_CONTENTS" | xargs)
-                    npm test'
+                sh '"export \$(echo "$ENV_FILE_CONTENTS" | xargs)
+                    npm test"'
                 junit 'test-results/**/*.xml'
             }
         }
