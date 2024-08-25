@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         NODE_ENV = "development"
+        // Environment Variables
+        ENV_FILE_CONTENTS = credentials('ENV_FILE_CONTENTS')
         // Docker Hub Credentials
         DOCKERHUB_CRED = 'dockerhub-cred'
         DOCKERHUB_REPO = 'somjeetsrimani/smart-commute-planner'
@@ -81,7 +83,8 @@ pipeline {
                 }
             }
             steps {
-                sh 'npm test'
+                sh 'export \$(echo "$ENV_FILE_CONTENTS" | xargs)
+                    npm test'
                 junit 'test-results/**/*.xml'
             }
         }
