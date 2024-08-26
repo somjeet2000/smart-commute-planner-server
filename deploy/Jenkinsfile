@@ -49,8 +49,8 @@ pipeline {
             }
             steps {
                 // Install Musl libraries explicitly
-                // sh 'apk add --no-cache musl'
-                // sh 'apk add --no-cache libc6-compat' // For compatibility with libraries that expect glibc
+                sh 'apk add --no-cache musl'
+                sh 'apk add --no-cache libc6-compat' // For compatibility with libraries that expect glibc
                 sh 'npm install'
             }
         }
