@@ -9,6 +9,9 @@ pipeline {
         DOCKERHUB_CRED = 'dockerhub-cred'
         DOCKERHUB_REPO = 'somjeetsrimani/smart-commute-planner'
         IMAGE_TAG = 'v1'
+        // Render Credentials
+        RENDER_SERVICE_ID = credentials('Render-Service-ID-Development')
+        RENDER_API_KEY_DEVELOPMENT = credentials('RenderDevelopment')
     }
 
     stages {
@@ -86,6 +89,24 @@ pipeline {
                         sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
                         sh 'docker push $DOCKERHUB_REPO:$IMAGE_TAG'
                     }
+                }
+            }
+        }
+
+        // Stage - Deploy the Changes to Render Service
+        stage('Deploy to Render Service') {
+            steps {
+                script {
+                    // Define the Render API Point
+                    def renderDevelopmentServiceAPI = "https://api.render.com/deploy/${env.RENDER_SERVICE_ID}"
+
+                    // Trigger the deployment on Render
+                    sh """
+                    curl -X POST ${renderDevelopmentServiceAPI} \
+                        -H 'Authorization: Bearer ${env.RENDER_API_KEY_DEVELOPMENT}' \
+                        -H 'Content-Type: application/json' \
+                        -d '{"clearCache": false}'
+                    """
                 }
             }
         }
